@@ -29,6 +29,14 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT)) #Resolution
 pygame.display.set_caption('Tic Tac Toe AI') #Window Title
 screen.fill(BLACK) #Window background color
 
+board = numpy.zeros((BOARD_ROWS, BOARD_COLS))
+
+def draw_lines(color=WHITE):
+    for i in range(1, BOARD_ROWS):
+        pygame.draw.line(sceen, color, start_pos:(0, SQUARE_SIZE * i), end_pos:(WIDTH, SQUARE_SIZE * i), LINE_WIDTH)
+        pygame.draw.line(sceen, color, start_pos:(SQUARE_SIZE * i, 0), end_pos:(SQUARE_SIZE * i, HEIGHT), LINE_WIDTH)
+        
+
 
 
 
