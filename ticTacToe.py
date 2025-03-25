@@ -12,6 +12,7 @@ GRAY = (180, 180, 180)
 RED = (255, 0,0)
 GREEN = (0,255,0)
 BLACK = (0,0,0)
+BLUE = (0,0,255)
 
 #Proportions
 WIDTH = 300
@@ -84,11 +85,19 @@ def check_win(player, check_board=board):
 # Display winner message
 def display_winner(player):
     font = pygame.font.Font(None, 40)  # Set font size
-    text = font.render(f"Player {player} Wins!", True, WHITE)
+    text = font.render(f"Player {player} Wins!", True, RED)
     text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))  # Center text
     screen.blit(text, text_rect)  # Render text on screen
     pygame.display.update()  # Update display
 
+# MinMax AI Function(s)
+def minmax(minimax_board, depth, is_maximizing):
+    if check_win(2, minmax_board):
+        return float('inf')
+    elif check_win(1, minimax_board):
+        return float('-inf')
+    elif is_board_full(minmax_board):
+        return 0
 
 # Game variables
 player = 1  # Player 1 starts
@@ -120,7 +129,8 @@ while True:
                     display_winner(player)  # Show winner message
                     continue  # Skip player switch
 
-                if is_board_full():  # If board is full, display draw message
+                # If board is full and no player win, display draw message
+                if is_board_full():  
                     game_over = True
                     font = pygame.font.Font(None, 40)
                     text = font.render("Draw!", True, WHITE)
