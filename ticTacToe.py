@@ -37,42 +37,96 @@ def draw_lines(color=WHITE):
         pygame.draw.line(screen, color, (SQUARE_SIZE * i, 0), (SQUARE_SIZE * i, HEIGHT), LINE_WIDTH)
 
 
-def draw_figures(color=WHITE):
+def draw_figures():
     for row in range(BOARD_ROWS):
         for col in range(BOARD_COLS):
-            if board[row][col] == 1:
-                pygame.draw.circle(screen, color, (int(col * SQUARE_SIZE + SQUARE_SIZE // 2), int(row * SQUARE_SIZE * SQUARE_SIZE // 2)), CIRCLE_RADIUS, CIRCLE_WIDTH)
-            elif board[row][col] == 2:
-                pygame.draw.line(screen, color, (col * SQUARE_SIZE * SQUARE_SIZE // 4, row * SQUARE_SIZE + SQUARE_SIZE // 4), (col * SQUARE_SIZE + 3 * SQUARE_SIZE // 4, row * SQUARE_SIZE + 3 * SQUARE_SIZE // 4))
-                pygame.draw.line(screen, color, (col * SQUARE_SIZE * SQUARE_SIZE // 4, row * SQUARE_SIZE + 3 * SQUARE_SIZE // 4), (col * SQUARE_SIZE + 3 * SQUARE_SIZE // 4, row * SQUARE_SIZE + SQUARE_SIZE // 4))
+            if board[row][col] == 1:  # Player 1 (O)
+                pygame.draw.circle(screen, WHITE, 
+                                   (int(col * SQUARE_SIZE + SQUARE_SIZE // 2), int(row * SQUARE_SIZE + SQUARE_SIZE // 2)), 
+                                   CIRCLE_RADIUS, CIRCLE_WIDTH)
+            elif board[row][col] == 2:  # Player 2 (X)
+                pygame.draw.line(screen, WHITE, 
+                                 (col * SQUARE_SIZE + 20, row * SQUARE_SIZE + 20), 
+                                 (col * SQUARE_SIZE + SQUARE_SIZE - 20, row * SQUARE_SIZE + SQUARE_SIZE - 20), CROSS_WIDTH)
+                pygame.draw.line(screen, WHITE, 
+                                 (col * SQUARE_SIZE + SQUARE_SIZE - 20, row * SQUARE_SIZE + 20), 
+                                 (col * SQUARE_SIZE + 20, row * SQUARE_SIZE + SQUARE_SIZE - 20), CROSS_WIDTH)
 
-
+# Function to mark a square on the board
 def mark_square(row, col, player):
     board[row][col] = player
 
-
+# Function to check if a square is available
 def available_square(row, col):
     return board[row][col] == 0
 
+# Function to check if the board is full
+def is_board_full():
+    return not (0 in board)
 
-def is_board_full(check_board=board):
-    for row in range(BOARD_ROWS):
-        for col in range(BOARD_COLS):
-            if check_board[row][col] == 0:
-                return (True)
-    return(False)
-
-
+# Function to check if a player has won
 def check_win(player, check_board=board):
+    # Check vertical win condition
     for col in range(BOARD_COLS):
         if check_board[0][col] == player and check_board[1][col] == player and check_board[2][col] == player:
-            return (True)
-    
+            return True
+    # Check horizontal win condition
     for row in range(BOARD_ROWS):
         if check_board[row][0] == player and check_board[row][1] == player and check_board[row][2] == player:
-            return(True)
-        
-    if check_board[0][0] == player and check_board[1][1] == player and check_board[2][0] == player:
-        return (True)
-    
-    return (False)
+            return True
+    # Check diagonal win conditions
+    if check_board[0][0] == player and check_board[1][1] == player and check_board[2][2] == player:  # Left-top to right-bottom
+        return True
+    if check_board[0][2] == player and check_board[1][1] == player and check_board[2][0] == player:  # Right-top to left-bottom
+        return True
+    return False
+
+# Display winner message
+def display_winner(player):
+    font = pygame.font.Font(None, 40)  # Set font size
+    text = font.render(f"Player {player} Wins!", True, WHITE)
+    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))  # Center text
+    screen.blit(text, text_rect)  # Render text on screen
+    pygame.display.update()  # Update display
+
+
+# Game variables
+player = 1  # Player 1 starts
+game_over = False  # Game state
+
+# Initial rendering
+draw_lines()
+pygame.display.update()
+
+# Game loop
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN and not game_over:
+            mouseX = event.pos[0]
+            mouseY = event.pos[1]
+            clicked_row = mouseY // SQUARE_SIZE
+            clicked_col = mouseX // SQUARE_SIZE
+
+            if available_square(clicked_row, clicked_col):
+                mark_square(clicked_row, clicked_col, player)
+                draw_figures()
+                pygame.display.update()  # Update display immediately
+
+                if check_win(player):  # If player wins, show message
+                    game_over = True
+                    display_winner(player)  # Show winner message
+                    continue  # Skip player switch
+
+                if is_board_full():  # If board is full, display draw message
+                    game_over = True
+                    font = pygame.font.Font(None, 40)
+                    text = font.render("Draw!", True, WHITE)
+                    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+                    screen.blit(text, text_rect)
+                    pygame.display.update()
+                    continue  # End game loop
+
+                player = 3 - player  # Switch player
